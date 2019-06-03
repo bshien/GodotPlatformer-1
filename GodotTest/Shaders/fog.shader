@@ -76,5 +76,5 @@ void fragment(){
 	vec2 motion = vec2( fbm( coord+vec2(TIME*0.5, TIME*-0.5)));
 	float final = fbm(coord+motion);
 	
-	COLOR.a = final;//fbm(UV*10.0);
+	COLOR.a = final*0.5;//fbm(UV*10.0);
 }
