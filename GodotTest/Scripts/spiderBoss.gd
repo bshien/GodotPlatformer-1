@@ -1,20 +1,15 @@
-extends KinematicBody2D
+extends Character
 #enemy runSpeed
-export (float) var runSpeed = 80
-var velocity = Vector2()
-export(float) var jumpHeight = 40
-export(float) var jumpTime = 0.3
 
-var dead := false
 
-export var maxHealth := 3
-onready var currentHealth := maxHealth
+#export var maxHealth := 3
+#onready var currentHealth := maxHealth
 #only spawn a skeleton once when the player enters near him
-var skeletonCanSpawn = true
-var spriteFacingRight = true 
+var skeletonCanSpawn := true
+var spriteFacingRight := true 
 
-onready var skeletonSpawn_resource = preload("res://Objects/Enemy.tscn")
-onready var player = get_node("../Player")
+onready var skeletonSpawn_resource := preload("res://Objects/Enemy.tscn")
+onready var player : Node2D = get_node("../Player")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -26,27 +21,23 @@ func _ready():
 	#nodePath is a string
 	skeletonSpawn.position = $"spawnPoint".position
 	add_child(skeletonSpawn)
-	
-func takeDamage(damage : int):
-	currentHealth -= damage
-	if(currentHealth <= 0):
-		dead = true
-		$AnimationPlayer.play("onDeath")
+	connect("death", self, "die")
 	
 func _physics_process(delta):
 	var move = 0.0
-	var gravity = 2*jumpHeight/(jumpTime*jumpTime)
+	var gravity = Utils.jumpGravity(jumpHeight, jumpTime)#2*jumpHeight/(jumpTime*jumpTime)
 
+	var pos := global_position
 	velocity.y += gravity*delta
 	#checks if guy is dead so no longer plays run animation
-	if(dead):
+	if dead:
 		return
 		
-	if(position.x < player.position.x - 15):
+	if pos.x < player.global_position.x:# - 15:
 		move += 1
 		$AnimationPlayer.play("spiderRun")
 			
-	if(position.x > player.position.x - 20):
+	if pos.x > player.global_position.x:# - 20:
 		if(velocity.x < 0):
 			spriteFacingRight = false
 		else:
@@ -63,4 +54,7 @@ func _physics_process(delta):
 	
 	velocity.x = move * runSpeed
 	# -y is up, +y is down
-	velocity = move_and_slide(velocity, Vector2(0, -1))
+	velocity = move_and_slide(velocity, Vector2.UP)
+
+func die():
+	$AnimationPlayer.play("onDeath")

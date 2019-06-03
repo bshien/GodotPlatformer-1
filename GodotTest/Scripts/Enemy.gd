@@ -1,9 +1,9 @@
-extends KinematicBody2D
+extends Character
 #enemy runSpeed
-export (float) var runSpeed = 100
-var velocity = Vector2()
-export(float) var jumpHeight = 40
-export(float) var jumpTime = 0.3
+#export (float) var runSpeed = 100
+#var velocity = Vector2()
+#export(float) var jumpHeight = 40
+#export(float) var jumpTime = 0.3
 var spriteFacingRight = true
 
 onready var player = get_node("../Player")
@@ -22,18 +22,18 @@ func _physics_process(delta):
 	if not player:
 		return
 	
-	if(position.x < player.position.x - 15):
+	if global_position.x < player.global_position.x - 15:
 		if(velocity.x > 0):
 			$Sprite.flip_h = false
 		move += 1
 		$AnimationPlayer.play("enemySkeletonWalk")
 		
-	if(position.x > player.position.x - 20):
-		if(velocity.x < 0):
+	if global_position.x > player.global_position.x - 20:
+		if velocity.x < 0:
 			spriteFacingRight = false
 		else:
 			spriteFacingRight = true
-		if(!spriteFacingRight):
+		if !spriteFacingRight:
 			$Sprite.flip_h = true
 		move -= 1
 		$AnimationPlayer.play("enemySkeletonWalk")
