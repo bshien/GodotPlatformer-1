@@ -1,17 +1,17 @@
-extends KinematicBody2D
+extends Character
 
+#const Utils = preload("res://Scripts/Utils.gd")
 
-const Utils = preload("res://Scripts/Utils.gd")
-
-export var runSpeed : float = 220
-
-export var jumpHeight : float = 40
-export var jumpTime : float = 0.3
+#export var runSpeed : float = 220
+#
+#export var jumpHeight : float = 40
+#export var jumpTime : float = 0.3
 export var canIdle := true
 export var canFall := true
 
+export var fastFallSpeed := 600.0
 
-var velocity := Vector2()
+#var velocity := Vector2()
 #Acceleration/strafing
 export var groundMvmtTime := {
 	accel = 0.2,
@@ -46,8 +46,8 @@ export var wallSlide := {
 #}
 
 #Child nodes
-onready var animP : AnimationPlayer = $AnimationPlayer
-onready var sprite : Sprite = $Sprite
+#onready var animP : AnimationPlayer = $AnimationPlayer
+#onready var sprite : Sprite = $Sprite
 
 var gravity := 0.0
 
@@ -58,6 +58,8 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
+	print(velocity.y)
+	
 	var move = 0
 	
 	velocity.y += gravity*delta
@@ -81,10 +83,10 @@ func _physics_process(delta):
 		playAnim("wall slide")
 		canFall = false
 	else:
-		gravity = 2*jumpHeight/(jumpTime*jumpTime)
+		gravity = Utils.jumpGravity(jumpHeight, jumpTime)#2*jumpHeight/(jumpTime*jumpTime)
 		
 	#movement
-	if(Input.is_action_pressed("ui_right")):
+	if Input.is_action_pressed("ui_right"):
 		#Use 1 for non-analog input
 		move += Input.get_action_strength("ui_right")
 		#sprite.flip_h = velocity.x < 0
@@ -100,23 +102,30 @@ func _physics_process(delta):
 			playAnim("run")
 	else:
 		move = 0
-		if canIdle:
+		if canIdle and onFloor:
 			playAnim("idle")
 		
 	if Input.is_action_just_pressed("jump"):
 		#Ground jump
 		if onFloor:
-			velocity.y = -2*jumpHeight/jumpTime
+			velocity.y = Utils.jumpVeloctiy(gravity,jumpTime)#-2*jumpHeight/jumpTime
+			print(velocity.y)
 			playAnim("jump")
 		#Wall jump
 		elif onWall:
 			canFall = false
 			playAnim("flip")
-			velocity.y = -2*jumpHeight/jumpTime
+			gravity = Utils.jumpGravity(jumpHeight,jumpTime)
+			velocity.y = Utils.jumpVeloctiy(gravity,jumpTime)#-2*jumpHeight/jumpTime
 		
 	#falling animation
-	if !onFloor and velocity.y > 0 and canFall and !onWall:
-		playAnim("fall")
+	if !onFloor and !onWall:
+		if Input.is_action_just_released("jump"):
+			velocity.y = max(velocity.y*0.5, 0)
+		elif Input.is_action_just_pressed("ui_down"):
+			velocity.y = fastFallSpeed
+		if canFall and velocity.y > 0:
+			playAnim("fall")
 
 	#attack animations
 	if Input.is_action_just_pressed("light attack") and canFall:
@@ -147,6 +156,7 @@ func _physics_process(delta):
 	var targetSpeed = move*runSpeed
 	velocity.x = Utils.moveTowards(velocity.x, targetSpeed, accelX*delta)
 	
+	velocity.y = min(velocity.y, fastFallSpeed)	
 	# -y is up, +y is down
 	velocity = move_and_slide(velocity, Vector2(0, -1))
 
