@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-uniform vec4 color : hint_color = vec4(0.33, 0.15, 0.82, 1.0);
+uniform vec4 color : hint_color = vec4(0.33, 0.15, 0.82, 0.5);
 uniform vec2 screenDim = vec2(640, 360);
 uniform int octaves = 4;
 
@@ -76,5 +76,5 @@ void fragment(){
 	vec2 motion = vec2( fbm( coord+vec2(TIME*0.5, TIME*-0.5)));
 	float final = fbm(coord+motion);
 	
-	COLOR.a = final*0.5;//fbm(UV*10.0);
+	COLOR.a = final*color.a;//fbm(UV*10.0);
 }

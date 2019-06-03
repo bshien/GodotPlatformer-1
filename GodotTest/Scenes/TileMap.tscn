@@ -18,7 +18,7 @@ script/source = "extends Camera2D
 
 [sub_resource type="ShaderMaterial" id=2]
 shader = ExtResource( 10 )
-shader_param/color = Color( 0.33, 0.15, 0.82, 1 )
+shader_param/color = Color( 0.33, 0.15, 0.82, 0.5 )
 shader_param/screenDim = Vector2( 640, 360 )
 shader_param/octaves = 4
 
